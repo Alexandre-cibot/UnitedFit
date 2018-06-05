@@ -13,7 +13,24 @@ import com.example.bottomnavigation.R
 import com.example.bottomnavigation.extension.*
 import com.example.bottomnavigation.helper.*
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import android.view.WindowManager
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import android.widget.Toast
+// import jdk.nashorn.internal.runtime.ECMAException.getException
+// import org.junit.experimental.results.ResultMatchers.isSuccessful
+import com.google.firebase.auth.AuthResult
+import com.google.android.gms.tasks.Task
+import android.support.annotation.NonNull
+import com.google.android.gms.tasks.OnCompleteListener
+import android.R.attr.password
+
+
+
+
+
+
 
 
 
@@ -26,11 +43,15 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
 
     private lateinit var toolbar: Toolbar
 
+    private var mAuth: FirebaseAuth? = null
+
     private lateinit var bottomNavigation: BottomNavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var prefs = getSharedPreferences("com.example.bottomnavigation", MODE_PRIVATE)
+
+        mAuth = FirebaseAuth.getInstance()
 
         if (prefs.getBoolean("firstrun", true)) {
             runIntro()
@@ -38,6 +59,34 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         } else {
             runApp(savedInstanceState)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Check if user is signed in (non-null) and update UI accordingly.
+        val currentUser = mAuth!!.getCurrentUser()
+        Log.d("currentUser", currentUser.toString())
+
+        mAuth!!.createUserWithEmailAndPassword("julien@citytaps.org", "testtest")
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d("firebase", "createUserWithEmail:success")
+                        val user = mAuth!!.getCurrentUser()
+                        Log.d("userCreated", user.toString())
+                        //updateUI(user)
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w("firebase", "createUserWithEmail:failure", task.exception)
+                        //Toast.makeText(this@EmailPasswordActivity, "Authentication failed.",
+                        //        Toast.LENGTH_SHORT).show()
+                        //updateUI(null)
+                    }
+
+                    // ...
+                }
+        // updateUI(currentUser)
+
     }
 
     fun runIntro() {
